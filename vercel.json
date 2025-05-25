@@ -1,6 +1,6 @@
 {
-  "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install",
+  "buildCommand": "npx prisma generate && next build",
+  "installCommand": "npm install --no-audit",
   "framework": "nextjs",
   "regions": ["iad1"],
   "crons": [],
@@ -12,7 +12,8 @@
   },
   "build": {
     "env": {
-      "PRISMA_GENERATE_DATAPROXY": "true"
+      "PRISMA_CLI_BINARY_TARGETS": "native,debian-openssl-3.0.x",
+      "PRISMA_CLIENT_ENGINE_TYPE": "binary"
     }
   },
   "git": {
