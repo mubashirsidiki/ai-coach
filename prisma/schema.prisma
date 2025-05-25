@@ -6,7 +6,7 @@ generator client {
 
 datasource db {
   provider     = "postgresql"
-  url          = env("DATABASE_URL")
+  url          = env("DATABASE_URL") // Should include ?pool_timeout=0 for no pooling, or a value for pooling
   directUrl    = env("DIRECT_URL")
   extensions   = [pgcrypto]
   relationMode = "prisma"
