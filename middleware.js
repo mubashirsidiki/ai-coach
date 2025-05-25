@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { db } from "@/lib/prisma";
+import { db, connectDB } from "@/lib/prisma";
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
@@ -10,10 +10,26 @@ const isProtectedRoute = createRouteMatcher([
   "/onboarding(.*)",
 ]);
 
+// Cache connection status
+let isConnected = false;
+
 export default clerkMiddleware(async (auth, req) => {
   try {
-    // Check database connection
-    await db.$queryRaw`SELECT 1`;
+    // Only check connection for protected routes
+    if (isProtectedRoute(req) && !isConnected) {
+      isConnected = await connectDB();
+      if (!isConnected) {
+        return new NextResponse(
+          JSON.stringify({ 
+            error: "Database connection error. Please try again later." 
+          }),
+          { 
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
     
     const { userId } = await auth();
 
@@ -26,8 +42,9 @@ export default clerkMiddleware(async (auth, req) => {
   } catch (error) {
     console.error("Middleware error:", error);
     
-    // If it's a database connection error
+    // Reset connection status on error
     if (error.code === 'P1001') {
+      isConnected = false;
       return new NextResponse(
         JSON.stringify({ 
           error: "Database connection error. Please try again later." 
