@@ -101,7 +101,7 @@ export default async function Header() {
                   userPreviewMainIdentifier: "font-semibold",
                 },
               }}
-              fallbackRedirectUrl="/"
+              afterSignOutUrl="/"
             />
           </SignedIn>
         </div>

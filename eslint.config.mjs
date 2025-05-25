@@ -1,25 +1,14 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import nextPlugin from "@next/eslint-plugin-next";
+import { FlatCompat } from "@eslint/eslintrc";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
-const config = [
-  {
-    ignores: ["node_modules/**", ".next/**", "build/**"],
-  },
-  {
-    plugins: {
-      "@next/next": nextPlugin,
-    },
-    rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs["core-web-vitals"].rules,
-      "no-unused-vars": "warn",
-    },
-  },
-];
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
 
-export default config;
+const eslintConfig = [...compat.extends("next/core-web-vitals")];
+
+export default eslintConfig;

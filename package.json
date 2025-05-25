@@ -7,11 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npx prisma generate",
-    "vercel-build": "npx prisma generate && next build"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.9.10",
