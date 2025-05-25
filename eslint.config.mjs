@@ -7,8 +7,17 @@ const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
+  recommendedConfig: true
 });
 
-const eslintConfig = [...compat.extends("next/core-web-vitals")];
-
-export default eslintConfig;
+export default [
+  {
+    ignores: ["node_modules/**", ".next/**", "build/**"],
+  },
+  ...compat.extends("next/core-web-vitals"),
+  {
+    rules: {
+      "no-unused-vars": "warn"
+    }
+  }
+];

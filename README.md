@@ -55,6 +55,7 @@ Initialize your database with Prisma:
 ```bash
 npx prisma generate
 npx prisma migrate dev --name init
+npx prisma db push    
 ```
 
 ### 4. Development Server
