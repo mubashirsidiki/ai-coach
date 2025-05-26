@@ -72,32 +72,35 @@ export async function getUserOnboardingStatus() {
   if (!userId) throw new Error("Unauthorized");
 
   try {
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
-    // If user doesn't exist in the database, create them
-    if (!user) {
-      const clerkUser = await currentUser();
-      if (!clerkUser) throw new Error("Clerk user not found");
-
-      const primaryEmail = clerkUser.emailAddresses.find(email => email.id === clerkUser.primaryEmailAddressId);
-      if (!primaryEmail) throw new Error("No email address found");
-
-      await db.user.create({
-        data: {
-          clerkUserId: userId,
-          email: primaryEmail.emailAddress,
-          name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
-          imageUrl: clerkUser.imageUrl,
-        },
+    // Use a transaction to ensure consistent connection handling
+    return await db.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { clerkUserId: userId },
       });
-      return { isOnboarded: false };
-    }
 
-    return {
-      isOnboarded: !!user.industry,
-    };
+      // If user doesn't exist in the database, create them
+      if (!user) {
+        const clerkUser = await currentUser();
+        if (!clerkUser) throw new Error("Clerk user not found");
+
+        const primaryEmail = clerkUser.emailAddresses.find(email => email.id === clerkUser.primaryEmailAddressId);
+        if (!primaryEmail) throw new Error("No email address found");
+
+        await tx.user.create({
+          data: {
+            clerkUserId: userId,
+            email: primaryEmail.emailAddress,
+            name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+            imageUrl: clerkUser.imageUrl,
+          },
+        });
+        return { isOnboarded: false };
+      }
+
+      return {
+        isOnboarded: !!user.industry,
+      };
+    });
   } catch (error) {
     console.error("Error checking onboarding status:", error);
     throw new Error("Failed to check onboarding status");
