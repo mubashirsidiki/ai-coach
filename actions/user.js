@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { generateAIInsights } from "./dashboard";
 
@@ -71,24 +71,32 @@ export async function getUserOnboardingStatus() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found");
-
   try {
     const user = await db.user.findUnique({
-      where: {
-        clerkUserId: userId,
-      },
-      select: {
-        industry: true,
-      },
+      where: { clerkUserId: userId },
     });
 
+    // If user doesn't exist in the database, create them
+    if (!user) {
+      const clerkUser = await currentUser();
+      if (!clerkUser) throw new Error("Clerk user not found");
+
+      const primaryEmail = clerkUser.emailAddresses.find(email => email.id === clerkUser.primaryEmailAddressId);
+      if (!primaryEmail) throw new Error("No email address found");
+
+      await db.user.create({
+        data: {
+          clerkUserId: userId,
+          email: primaryEmail.emailAddress,
+          name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+          imageUrl: clerkUser.imageUrl,
+        },
+      });
+      return { isOnboarded: false };
+    }
+
     return {
-      isOnboarded: !!user?.industry,
+      isOnboarded: !!user.industry,
     };
   } catch (error) {
     console.error("Error checking onboarding status:", error);
