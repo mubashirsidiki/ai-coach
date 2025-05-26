@@ -1,4 +1,4 @@
-# 🤖 AI Career Coach
+# 🤖 AI Career Coach Proj
 
 A modern full-stack application built with cutting-edge technologies to help guide your career path.
 
