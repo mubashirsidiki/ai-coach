@@ -1,48 +1,46 @@
-# 🤖 AI Career Coach Proj
+# AI-Coach Project (Deployed on Vercel)
 
-A modern full-stack application built with cutting-edge technologies to help guide your career path.
+## 📦 Clone the Repository
 
-[![Watch Tutorial](https://img.shields.io/badge/Watch-Tutorial-red)](https://youtu.be/UbXpRv5ApKA)
+First, clone the repository to your local machine:
 
-![sensai](https://github.com/user-attachments/assets/eee79242-4056-4d19-b655-2873788979e1)
-
-## 🚀 Tech Stack
-
-- [Next.js 15](https://nextjs.org/) with Turbopack
-- [Neon DB](https://neon.tech/) for PostgreSQL
-- [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Prisma](https://www.prisma.io/) as ORM
-- [Inngest](https://www.inngest.com/) for background jobs
-- [Shadcn UI](https://ui.shadcn.com/) for components
-- [Clerk](https://clerk.com/) for authentication
+```bash
+git clone https://github.com/mubashirsidiki/ai-coach.git
+cd ai-coach
+````
 
 ## 🛠️ Setup Instructions
 
 ### 1. Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the root directory and add the following variables:
 
 ```env
-# Database
-DATABASE_URL=
-
-# Authentication
+# Clerk Configuration
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
-
-# Auth Redirects
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/onboarding
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
-
-# AI
 GEMINI_API_KEY=
+
+# Supabase Configuration
+POSTGRES_PRISMA_URL=
+POSTGRES_URL_NON_POOLING=
+DATABASE_URL=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NODE_ENV=production
 ```
+
+➡️ For the latest environment variable values, visit:
+[Google Sheet – Environment Variables](https://docs.google.com/spreadsheets/d/10w5EQ52yH5jLEtKI3nJlxiKlwBaxrBGY7X6TL7ga-IA/edit?usp=sharing)
 
 ### 2. Installation
 
-Make sure you have **Node.js 18 or later** installed, then:
+Make sure you have **Node.js 18 or later** installed, then run:
 
 ```bash
 npm install
@@ -75,6 +73,14 @@ npm run build
 npm run start
 ```
 
-## 📝 License
+## 🧱 Tech Stack
 
-This project is open-source and available under the MIT license.
+* [Next.js 15](https://nextjs.org/) with Turbopack
+* [Neon DB](https://neon.tech/) for PostgreSQL
+* [Tailwind CSS](https://tailwindcss.com/) for styling
+* [Prisma](https://www.prisma.io/) as ORM
+* [Inngest](https://www.inngest.com/) for background jobs
+* [Shadcn UI](https://ui.shadcn.com/) for components
+* [Clerk](https://clerk.com/) for authentication
+
+```
