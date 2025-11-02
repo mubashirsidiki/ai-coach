@@ -9,8 +9,8 @@ import { dark } from "@clerk/themes";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "AI Career Coach",
-  description: "",
+  title: "CareerForge - AI-Powered Career Development Platform",
+  description: "Transform your career with AI-powered resume building, cover letter generation, and interview preparation. Get personalized guidance tailored to your industry.",
 };
 
 export default function RootLayout({ children }) {

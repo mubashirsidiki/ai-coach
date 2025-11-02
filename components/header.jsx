@@ -16,23 +16,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
+import { LogoWithText } from "@/components/logo";
 import { checkUser } from "@/lib/checkUser";
 
 export default async function Header() {
   await checkUser();
 
   return (
-    <header className="fixed top-0 w-full border-b bg-background/80 backdrop-blur-md z-50 supports-[backdrop-filter]:bg-background/60">
-      <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/">
-          <Image
-            src={"/logo.png"}
-            alt="Sensai Logo"
-            width={200}
-            height={60}
-            className="h-12 py-1 w-auto object-contain"
-          />
+    <header className="fixed top-0 w-full border-b glass z-50 supports-[backdrop-filter]:glass">
+      <nav className="container mx-auto px-4 h-18 flex items-center justify-between">
+        <Link href="/" className="hover:opacity-80 transition-opacity">
+          <LogoWithText />
         </Link>
 
         {/* Action Buttons */}
@@ -54,7 +48,7 @@ export default async function Header() {
             {/* Growth Tools Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="flex items-center gap-2">
+                <Button className="flex items-center gap-2 gradient hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
                   <StarsIcon className="h-4 w-4" />
                   <span className="hidden md:block">Growth Tools</span>
                   <ChevronDown className="h-4 w-4" />
