@@ -294,14 +294,25 @@ export default function JobQuiz({ job }) {
         reviewScore: q.review?.score
       })));
 
-      // Save results to database
+      // Save results to database - Always attempt to save, even if some reviews failed
       let savedAssessment = null;
       try {
+        console.log("Saving quiz results to database...", {
+          questionCount: questionResults.length,
+          score,
+          jobTitle: job.title,
+          jobCompany: job.company
+        });
         savedAssessment = await saveJobQuizResult(questionResults, score, job.title, job.company);
-        toast.success("Results saved!");
+        console.log("Results saved successfully:", savedAssessment?.id);
+        toast.success("Results saved to your history!");
       } catch (error) {
-        console.error("Error saving results:", error);
-        toast.error("Quiz completed but failed to save results");
+        console.error("Error saving results to database:", error);
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack
+        });
+        toast.error(`Quiz completed but failed to save results: ${error.message}`);
       }
 
       const result = {

@@ -16,6 +16,7 @@ import { generateQuiz, saveQuizResult } from "@/actions/interview";
 import QuizResult from "./quiz-result";
 import useFetch from "@/hooks/use-fetch";
 import { BarLoader } from "react-spinners";
+import { ArrowLeft } from "lucide-react";
 
 export default function Quiz({ category, onBack }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);

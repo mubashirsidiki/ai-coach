@@ -83,9 +83,8 @@ export default function JobQuizPage() {
           <CardContent>
             <div className="space-y-2">
               <p className="text-sm font-medium">Job Description Preview:</p>
-              <div className="text-sm text-muted-foreground line-clamp-3 bg-muted/50 p-3 rounded-lg">
-                {job.description.substring(0, 300)}
-                {job.description.length > 300 && "..."}
+              <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg max-h-[200px] overflow-y-auto">
+                {job.description}
               </div>
             </div>
           </CardContent>

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CategorySelector from "./_components/category-selector";
-import AssessmentLoader from "./_components/assessment-loader";
 
 export default function IndustryPracticePage() {
   return (
@@ -24,9 +23,6 @@ export default function IndustryPracticePage() {
 
       {/* Category Selection */}
       <CategorySelector />
-
-      {/* Stats and History */}
-      <AssessmentLoader />
     </div>
   );
 }

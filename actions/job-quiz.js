@@ -232,6 +232,13 @@ export async function saveJobQuizResult(questionResults, score, jobTitle, jobCom
       }
     });
 
+    console.log("Creating assessment record...", {
+      userId: user.id,
+      quizScore: score,
+      questionCount: formattedQuestions.length,
+      category: `Job-Based: ${jobTitle} at ${jobCompany}`
+    });
+
     const assessment = await db.assessment.create({
       data: {
         userId: user.id,
@@ -242,10 +249,16 @@ export async function saveJobQuizResult(questionResults, score, jobTitle, jobCom
       },
     });
 
+    console.log("Assessment created successfully:", assessment.id);
     return assessment;
   } catch (error) {
     console.error("Error saving job quiz result:", error);
-    throw new Error("Failed to save quiz result");
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+    throw new Error(`Failed to save quiz result: ${error.message}`);
   }
 }
 

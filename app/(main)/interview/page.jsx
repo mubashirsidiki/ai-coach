@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Zap
 } from "lucide-react";
+import AssessmentHistory from "./_components/assessment-history";
 
 export default function InterviewPrepPage() {
   return (
@@ -185,7 +186,7 @@ export default function InterviewPrepPage() {
       </div>
 
       {/* Quick Comparison */}
-      <Card className="glass border-2 border-muted">
+      <Card className="glass border-2 border-muted mb-8">
         <CardHeader>
           <CardTitle className="text-xl">Not sure which to choose?</CardTitle>
         </CardHeader>
@@ -210,6 +211,12 @@ export default function InterviewPrepPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Assessment History */}
+      <div>
+        <h2 className="text-3xl font-bold text-foreground mb-6">Your Quiz History</h2>
+        <AssessmentHistory />
+      </div>
     </div>
   );
 }
