@@ -86,14 +86,10 @@ body {
 
 @layer utilities {
   .gradient {
-    background: linear-gradient(135deg, #a855f7 0%, #06b6d4 50%, #ec4899 100%);
+    @apply bg-primary;
   }
   .gradient-title {
-    background: linear-gradient(135deg, #a855f7 0%, #06b6d4 50%, #ec4899 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    @apply font-extrabold tracking-tight;
+    @apply text-foreground font-extrabold tracking-tight;
   }
   .gradient-subtle {
     background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(236, 72, 153, 0.1) 100%);

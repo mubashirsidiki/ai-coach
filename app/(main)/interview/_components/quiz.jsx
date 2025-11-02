@@ -17,16 +17,20 @@ import QuizResult from "./quiz-result";
 import useFetch from "@/hooks/use-fetch";
 import { BarLoader } from "react-spinners";
 
-export default function Quiz() {
+export default function Quiz({ category, onBack }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  const generateQuizWithCategory = async () => {
+    return generateQuiz(category);
+  };
 
   const {
     loading: generatingQuiz,
     fn: generateQuizFn,
     data: quizData,
-  } = useFetch(generateQuiz);
+  } = useFetch(generateQuizWithCategory);
 
   const {
     loading: savingResult,
@@ -69,7 +73,7 @@ export default function Quiz() {
   const finishQuiz = async () => {
     const score = calculateScore();
     try {
-      await saveQuizResultFn(quizData, answers, score);
+      await saveQuizResultFn(quizData, answers, score, category);
       toast.success("Quiz completed!");
     } catch (error) {
       toast.error(error.message || "Failed to save quiz results");
@@ -91,30 +95,51 @@ export default function Quiz() {
   // Show results if quiz is completed
   if (resultData) {
     return (
-      <div className="mx-2">
-        <QuizResult result={resultData} onStartNew={startNewQuiz} />
+      <div className="space-y-4">
+        {onBack && (
+          <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Category Selection
+          </Button>
+        )}
+        <div className="mx-2">
+          <QuizResult result={resultData} onStartNew={startNewQuiz} />
+        </div>
       </div>
     );
   }
 
   if (!quizData) {
     return (
-      <Card className="mx-2">
-        <CardHeader>
-          <CardTitle>Ready to test your knowledge?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            This quiz contains 10 questions specific to your industry and
-            skills. Take your time and choose the best answer for each question.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={generateQuizFn} className="w-full">
-            Start Quiz
+      <div className="space-y-4">
+        {onBack && (
+          <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Category Selection
           </Button>
-        </CardFooter>
-      </Card>
+        )}
+        <Card className="mx-2">
+          <CardHeader>
+            <CardTitle>
+              {category === "Behavioral" 
+                ? "Ready for Behavioral Interview Practice?"
+                : "Ready to test your knowledge?"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              {category === "Behavioral"
+                ? "This quiz contains 10 behavioral and situational interview questions. Practice answering common scenarios you might encounter."
+                : "This quiz contains 10 questions specific to your industry and skills. Take your time and choose the best answer for each question."}
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={generateQuizFn} className="w-full">
+              Start Quiz
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
     );
   }
 

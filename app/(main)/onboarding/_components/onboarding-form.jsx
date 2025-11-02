@@ -79,7 +79,7 @@ const OnboardingForm = ({ industries }) => {
     <div className="flex items-center justify-center bg-background">
       <Card className="w-full max-w-lg mt-10 mx-2">
         <CardHeader>
-          <CardTitle className="gradient-title text-4xl">
+          <CardTitle className="text-foreground text-4xl font-bold">
             Complete Your Profile
           </CardTitle>
           <CardDescription>

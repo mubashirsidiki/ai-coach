@@ -7,7 +7,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-2.0-flash" });
 
-export async function generateQuiz() {
+export async function generateQuiz(category = "Technical") {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
@@ -21,7 +21,34 @@ export async function generateQuiz() {
 
   if (!user) throw new Error("User not found");
 
-  const prompt = `
+  const isBehavioral = category === "Behavioral";
+  
+  const prompt = isBehavioral
+    ? `
+    Generate 10 behavioral/situational interview questions.
+    These should focus on:
+    - Situational judgment ("Tell me about a time when...")
+    - Problem-solving scenarios
+    - Teamwork and collaboration
+    - Conflict resolution
+    - Leadership examples
+    
+    Each question should be multiple choice with 4 options representing different approaches or responses.
+    Each option should represent a realistic response or action someone might take.
+    
+    Return the response in this JSON format only, no additional text:
+    {
+      "questions": [
+        {
+          "question": "string",
+          "options": ["string", "string", "string", "string"],
+          "correctAnswer": "string",
+          "explanation": "string"
+        }
+      ]
+    }
+  `
+    : `
     Generate 10 technical interview questions for a ${
       user.industry
     } professional${
@@ -57,7 +84,7 @@ export async function generateQuiz() {
   }
 }
 
-export async function saveQuizResult(questions, answers, score) {
+export async function saveQuizResult(questions, answers, score, category = "Technical") {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
@@ -116,7 +143,7 @@ export async function saveQuizResult(questions, answers, score) {
         userId: user.id,
         quizScore: score,
         questions: questionResults,
-        category: "Technical",
+        category,
         improvementTip,
       },
     });
