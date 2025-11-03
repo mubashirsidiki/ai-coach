@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Briefcase, MapPin, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import JobQuiz from "./_components/job-quiz";
+import ModeSelector from "./_components/mode-selector";
 
 export default function JobQuizPage() {
   const searchParams = useSearchParams();
@@ -53,18 +53,22 @@ export default function JobQuizPage() {
   }
 
   return (
-    <div className="container mx-auto space-y-6 py-6">
+    <div className="container mx-auto py-6 max-w-7xl">
       {/* Header */}
-      <div className="flex flex-col space-y-4">
+      <div className="mb-6">
         <Link href="/interview/jobs">
           <Button variant="link" className="gap-2 pl-0">
             <ArrowLeft className="h-4 w-4" />
             Back to Job Listings
           </Button>
         </Link>
+      </div>
 
-        {/* Job Details Card - Always Visible */}
-        <Card className="glass border-2 border-primary/30 sticky top-4 z-10">
+      {/* Main Content Area - Split Layout */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Left Side - Sticky Job Details Card */}
+        <div className="w-full lg:w-1/3 lg:sticky lg:top-24 lg:self-start">
+          <Card className="glass border-2 border-primary/30 shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl mb-2">{job.title}</CardTitle>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -83,15 +87,18 @@ export default function JobQuizPage() {
           <CardContent>
             <div className="space-y-2">
               <p className="text-sm font-medium">Job Description Preview:</p>
-              <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg max-h-[200px] overflow-y-auto">
+                <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg max-h-[400px] overflow-y-auto">
                 {job.description}
               </div>
             </div>
           </CardContent>
         </Card>
+        </div>
 
-        {/* Quiz Component */}
-        <JobQuiz job={job} />
+        {/* Right Side - Mode Selector */}
+        <div className="w-full lg:w-2/3 flex-1">
+          <ModeSelector job={job} />
+        </div>
       </div>
     </div>
   );

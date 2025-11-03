@@ -24,7 +24,7 @@ export default async function Header() {
 
   return (
     <header className="fixed top-0 w-full border-b glass z-50 supports-[backdrop-filter]:glass">
-      <nav className="container mx-auto px-4 h-18 flex items-center justify-between">
+      <nav className="container mx-auto px-4 h-20 flex items-center justify-between max-w-7xl">
         <Link href="/" className="hover:opacity-80 transition-opacity">
           <LogoWithText />
         </Link>

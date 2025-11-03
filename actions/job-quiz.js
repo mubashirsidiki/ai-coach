@@ -151,6 +151,185 @@ export async function generateJobBasedQuiz(jobDescription, jobTitle, companyName
 }
 
 /**
+ * Save live interview results to the assessment table
+ * @param {Array} transcript - Array of conversation entries (user + bot)
+ * @param {number} questionCount - Number of questions asked
+ * @param {string} jobTitle - Job title for context
+ * @param {string} jobCompany - Company name for context
+ * @param {string} jobDescription - Job description for analysis
+ * @returns {Promise<Object>} Result with score and analysis
+ */
+export async function saveLiveInterviewResult(transcript, questionCount, jobTitle, jobCompany, jobDescription) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) throw new Error("User not found");
+
+  try {
+    // Format transcript for analysis
+    const conversationText = transcript
+      .map(entry => `${entry.speaker === "bot" ? "Interviewer" : "Candidate"}: ${entry.text}`)
+      .join("\n\n");
+
+    // Generate comprehensive analysis using Gemini - NO FALLBACKS
+    // Include full transcript for accurate analysis
+    const fullTranscript = transcript
+      .map((entry, index) => {
+        const timestamp = entry.timestamp 
+          ? new Date(entry.timestamp).toLocaleTimeString() 
+          : `[${index + 1}]`;
+        return `[${timestamp}] ${entry.speaker === "bot" ? "Interviewer" : "Candidate"}: ${entry.text}`;
+      })
+      .join("\n\n");
+
+    const analysisPrompt = `
+You are an expert interview analyst. Analyze this complete live interview conversation for the position of ${jobTitle} at ${jobCompany}.
+
+JOB DESCRIPTION:
+${jobDescription.substring(0, 3000)}
+
+COMPLETE INTERVIEW TRANSCRIPT:
+${fullTranscript}
+
+INTERVIEW METADATA:
+- Total Questions Asked: ${questionCount}
+- Total Conversation Turns: ${transcript.length}
+- Interview Type: Live Real-time Interview
+
+ANALYSIS REQUIREMENTS:
+Provide a comprehensive, detailed analysis in valid JSON format ONLY. Do not include any text outside the JSON object.
+
+Required JSON structure:
+{
+  "overallScore": <number 0-100>,
+  "communicationScore": <number 0-100>,
+  "technicalScore": <number 0-100>,
+  "responseQuality": <number 0-100>,
+  "strengths": [<array of 3-5 specific strengths with examples>],
+  "weaknesses": [<array of 3-5 specific weaknesses with examples>],
+  "improvementTip": "<2-3 sentences of actionable, specific advice>",
+  "feedback": "<detailed paragraph (4-5 sentences) analyzing overall performance, communication style, technical knowledge, and areas for growth>",
+  "questionAnalysis": [<array of objects, one per question, with: {"question": "...", "answer": "...", "score": 0-100, "feedback": "..."}>]
+}
+
+EVALUATION CRITERIA:
+1. Communication Skills (30%): Clarity, articulation, confidence, active listening
+2. Technical Knowledge (30%): Relevance to job requirements, depth of understanding
+3. Response Quality (25%): Completeness, structure, examples provided
+4. Professionalism (15%): Tone, engagement, follow-up questions
+
+Be specific and reference actual quotes from the transcript in your analysis. Score based on actual performance, not leniency.
+
+Return ONLY valid JSON, no additional text or markdown.
+    `.trim();
+
+    // Generate analysis using Gemini - NO FALLBACKS
+    let analysis;
+    let retries = 0;
+    const maxRetries = 3;
+    
+    while (retries < maxRetries) {
+      try {
+        const result = await model.generateContent(analysisPrompt);
+        const text = result.response.text();
+        
+        // Clean up response - remove markdown code blocks
+        let cleanedText = text
+          .replace(/```json\n?/g, "")
+          .replace(/```\n?/g, "")
+          .replace(/^json\s*/i, "")
+          .trim();
+        
+        // Extract JSON from response
+        const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          cleanedText = jsonMatch[0];
+        }
+        
+        analysis = JSON.parse(cleanedText);
+        
+        // Validate required fields
+        if (!analysis.overallScore || !analysis.communicationScore || !analysis.feedback) {
+          throw new Error("Incomplete analysis response");
+        }
+        
+        // Success - break out of retry loop
+        break;
+      } catch (error) {
+        retries++;
+        console.error(`Error generating analysis (attempt ${retries}/${maxRetries}):`, error);
+        
+        if (retries >= maxRetries) {
+          // After all retries failed, throw error - NO FALLBACK
+          throw new Error(`Failed to generate interview analysis after ${maxRetries} attempts: ${error.message}. Please try again.`);
+        }
+        
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+      }
+    }
+
+    // Format questions for database storage - include full analysis
+    const formattedQuestions = [{
+      type: "live-interview",
+      transcript: transcript,
+      questionCount: questionCount,
+      analysis: {
+        overallScore: analysis.overallScore,
+        communicationScore: analysis.communicationScore,
+        technicalScore: analysis.technicalScore,
+        responseQuality: analysis.responseQuality,
+        strengths: analysis.strengths || [],
+        weaknesses: analysis.weaknesses || [],
+        feedback: analysis.feedback,
+        questionAnalysis: analysis.questionAnalysis || []
+      }
+    }];
+
+    // Save to database
+    const assessment = await db.assessment.create({
+      data: {
+        userId: user.id,
+        quizScore: analysis.overallScore,
+        questions: formattedQuestions,
+        category: `Live Interview: ${jobTitle} at ${jobCompany}`,
+        improvementTip: analysis.improvementTip,
+      },
+    });
+
+    console.log("Live interview assessment saved:", assessment.id);
+
+    // Return formatted result for display - include full analysis
+    return {
+      quizScore: analysis.overallScore,
+      questions: [{
+        type: "live-interview",
+        transcript: transcript,
+        analysis: {
+          overallScore: analysis.overallScore,
+          communicationScore: analysis.communicationScore,
+          technicalScore: analysis.technicalScore,
+          responseQuality: analysis.responseQuality,
+          strengths: analysis.strengths || [],
+          weaknesses: analysis.weaknesses || [],
+          feedback: analysis.feedback,
+          questionAnalysis: analysis.questionAnalysis || []
+        },
+        questionCount: questionCount
+      }],
+      improvementTip: analysis.improvementTip,
+    };
+  } catch (error) {
+    console.error("Error saving live interview result:", error);
+    throw new Error(`Failed to save interview result: ${error.message}`);
+  }
+}
+
+/**
  * Save job-based quiz results to the assessment table
  * @param {Array} questionResults - Array of question results (theory + MCQ)
  * @param {number} score - Overall quiz score
